@@ -170,10 +170,12 @@ export class PanelSuperadminComponent implements OnInit, OnDestroy {
 
       // B) Si la imagen es subida dinámicamente (contiene timestamp '_17' o carpetas de carga)
       // Apuntamos al Backend (localhost:8081) usando tu WebConfig
-      if (urlLimpia.includes('_17') || urlLimpia.includes('waffles/') || urlLimpia.includes('jugos-ensaladas-y-sandwiches/')) {
-        const rutaFormateada = urlLimpia.startsWith('/') ? urlLimpia : '/' + urlLimpia;
-        return `${this.API_URL}${rutaFormateada}`; // Devuelve: http://localhost:/img/...
-      }
+      // B) Si la imagen es subida dinámicamente (contiene timestamp '_17' o carpetas de carga)
+// Apuntamos a Netlify (Frontend) donde SÍ persisten las imágenes
+if (urlLimpia.includes('_17') || urlLimpia.includes('waffles/') || urlLimpia.includes('jugos-ensaladas-y-sandwiches/')) {
+  const rutaFormateada = urlLimpia.startsWith('/') ? urlLimpia : '/' + urlLimpia;
+  return `https://polaris-frontend.netlify.app${rutaFormateada}`; // ✅ NETLIFY
+}
 
       // C) Si es una imagen estática estándar
       return urlLimpia.startsWith('/') ? urlLimpia : '/' + urlLimpia;
