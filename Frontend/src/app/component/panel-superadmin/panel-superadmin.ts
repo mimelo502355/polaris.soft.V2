@@ -77,7 +77,7 @@ export interface Venta {
 })
 export class PanelSuperadminComponent implements OnInit, OnDestroy {
 
-  readonly API_URL = 'http://localhost:8081';
+  readonly API_URL = 'https://polaris-soft-v2.onrender.com';
   private destroyRef = inject(DestroyRef);
 
   section: 'dashboard' | 'empleados' | 'productos' | 'ventas' = 'dashboard';
@@ -172,7 +172,7 @@ export class PanelSuperadminComponent implements OnInit, OnDestroy {
       // Apuntamos al Backend (localhost:8081) usando tu WebConfig
       if (urlLimpia.includes('_17') || urlLimpia.includes('waffles/') || urlLimpia.includes('jugos-ensaladas-y-sandwiches/')) {
         const rutaFormateada = urlLimpia.startsWith('/') ? urlLimpia : '/' + urlLimpia;
-        return `${this.API_URL}${rutaFormateada}`; // Devuelve: http://localhost:8081/img/...
+        return `${this.API_URL}${rutaFormateada}`; // Devuelve: http://localhost:/img/...
       }
 
       // C) Si es una imagen estática estándar
