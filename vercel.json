@@ -1,0 +1,11 @@
+{
+  "rootDirectory": "Frontend",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/appproyectods2025",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
