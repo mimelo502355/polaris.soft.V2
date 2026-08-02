@@ -1,0 +1,170 @@
+<div class="historial-flotante" *ngIf="clienteService.isClienteLogueado()">
+  
+  <!-- BOTÓN FLOTANTE -->
+  <div class="historial-btn" (click)="toggleModal()" title="Ver historial">
+    <div class="historial-icon">📋</div>
+    <div *ngIf="getCantidadEnProceso() > 0" class="historial-badge">
+      {{ getCantidadEnProceso() }}
+    </div>
+  </div>
+
+  <!-- MODAL HISTORIAL -->
+  <div *ngIf="mostrarModal" class="historial-modal">
+    
+    <!-- HEADER -->
+    <div class="modal-header">
+      <h3>Mis Pedidos</h3>
+      <button class="btn-close" (click)="toggleModal()">✕</button>
+    </div>
+
+    <!-- TABS -->
+    <div class="modal-tabs">
+      <button 
+        class="tab-btn"
+        [class.active]="activeTab === 'proceso'"
+        (click)="cambiarTab('proceso')">
+        En Proceso ({{ pedidosEnProceso.length }})
+      </button>
+      <button 
+        class="tab-btn"
+        [class.active]="activeTab === 'realizados'"
+        (click)="cambiarTab('realizados')">
+        Realizados ({{ pedidosRealizados.length }})
+      </button>
+    </div>
+
+    <!-- CONTENIDO -->
+    <div class="modal-content">
+      
+      <!-- TAB: EN PROCESO -->
+      <div *ngIf="activeTab === 'proceso'" class="tab-content">
+        <div *ngIf="loading" class="loading">Cargando...</div>
+        
+        <div *ngIf="!loading && pedidosEnProceso.length === 0" class="empty">
+          No tienes pedidos en proceso
+        </div>
+
+        <div *ngFor="let pedido of pedidosEnProceso" class="pedido-card">
+          <div class="pedido-header">
+            <span class="estado-badge" [style.background]="getEstadoColor(pedido.estado)">
+              {{ getEstadoIcon(pedido.estado) }} {{ pedido.estado }}
+            </span>
+            <span class="pedido-hora">hace poco</span>
+          </div>
+          <div class="pedido-info">
+            <p><strong>Pedido #{{ pedido.idPedido?.substring(0, 8) }}</strong></p>
+            <p class="tipo">{{ pedido.tipoPedido === 'MESA' ? '🪑 Mesa ' + pedido.mesa : '🛍️ Para llevar' }}</p>
+            <p class="total">S/. {{ pedido.totalPagar }}</p>
+          </div>
+          <button class="btn-detalle" (click)="verDetalle(pedido)">
+            Ver Estado →
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB: REALIZADOS -->
+      <div *ngIf="activeTab === 'realizados'" class="tab-content">
+        <div *ngIf="loading" class="loading">Cargando...</div>
+        
+        <div *ngIf="!loading && pedidosRealizados.length === 0" class="empty">
+          No tienes pedidos realizados
+        </div>
+
+        <div *ngFor="let pedido of pedidosRealizados" class="pedido-card">
+          <div class="pedido-header">
+            <span class="estado-badge" [style.background]="getEstadoColor(pedido.estado)">
+              {{ getEstadoIcon(pedido.estado) }} {{ pedido.estado }}
+            </span>
+            <span class="pedido-hora">{{ pedido.createdAt | date: 'dd/MM' }}</span>
+          </div>
+          <div class="pedido-info">
+            <p><strong>Pedido #{{ pedido.idPedido?.substring(0, 8) }}</strong></p>
+            <p class="tipo">{{ pedido.tipoPedido === 'MESA' ? '🪑 Mesa ' + pedido.mesa : '🛍️ Para llevar' }}</p>
+            <p class="total">S/. {{ pedido.totalPagar }}</p>
+          </div>
+          <button class="btn-detalle" (click)="verDetallePedido(pedido)">
+            👁️ Ver Detalle
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ MODAL VER DETALLE PEDIDO - MEJORADO CON PRODUCTOS -->
+  <div class="modal-detalle-backdrop" *ngIf="mostrarModalDetalle && pedidoDetalle" (click)="cerrarModalDetalle()">
+    <div class="modal-detalle" (click)="$event.stopPropagation()">
+      
+      <div class="detalle-header">
+        <h3>Detalles del Pedido</h3>
+        <button class="btn-close-detalle" (click)="cerrarModalDetalle()">✕</button>
+      </div>
+
+      <div class="detalle-contenido">
+        
+        <div class="detalle-seccion">
+          <p class="detalle-label">Número de Pedido</p>
+          <p class="detalle-valor">{{ pedidoDetalle?.idPedido?.substring(0, 8) }}</p>
+        </div>
+
+        <div class="detalle-seccion">
+          <p class="detalle-label">Estado</p>
+          <p class="detalle-valor estado-badge-modal" [style.background]="getEstadoColor(pedidoDetalle?.estado)">
+            {{ getEstadoIcon(pedidoDetalle?.estado) }} {{ pedidoDetalle?.estado }}
+          </p>
+        </div>
+
+        <div class="detalle-seccion">
+          <p class="detalle-label">Descripción</p>
+          <p class="detalle-valor-desc">{{ getDescripcionEstado(pedidoDetalle?.estado) }}</p>
+        </div>
+
+        <div class="detalle-seccion">
+          <p class="detalle-label">Tipo</p>
+          <p class="detalle-valor">
+            {{ pedidoDetalle?.tipoPedido === 'MESA' ? '🪑 Mesa ' + pedidoDetalle?.mesa : '🛍️ Para llevar' }}
+          </p>
+        </div>
+
+        <!-- ✅ NUEVO: SECCIÓN DE PRODUCTOS -->
+        <div class="detalle-seccion">
+          <p class="detalle-label">Productos</p>
+          <div class="productos-lista">
+            <div *ngIf="!pedidoDetalle?.items || pedidoDetalle?.items?.length === 0" class="producto-vacio">
+              Cargando productos...
+            </div>
+            <div *ngFor="let item of pedidoDetalle?.items" class="producto-item">
+              <div class="producto-nombre">
+                📦 {{ item.nombreProducto }}
+              </div>
+              <div class="producto-detalles">
+                <span class="cantidad">x{{ item.cantidad }}</span>
+                <span class="precio">S/. {{ item.precioUnitarioFinal }}</span>
+              </div>
+              <!-- Mostrar acompañamientos si existen -->
+              <div *ngIf="item.toppings && item.toppings.length > 0" class="acompanamientos">
+                🧀 Toppings: {{ item.toppings.join(', ') }}
+              </div>
+              <div *ngIf="item.salsas && item.salsas.length > 0" class="acompanamientos">
+                🌶️ Salsas: {{ item.salsas.join(', ') }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detalle-seccion">
+          <p class="detalle-label">Total Pagado</p>
+          <p class="detalle-valor-total">S/. {{ pedidoDetalle?.totalPagar }}</p>
+        </div>
+
+        <div class="detalle-seccion">
+          <p class="detalle-label">Fecha</p>
+          <p class="detalle-valor">{{ pedidoDetalle?.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+      </div>
+
+      <div class="detalle-footer">
+        <button class="btn-cerrar-detalle" (click)="cerrarModalDetalle()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>

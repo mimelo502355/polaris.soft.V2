@@ -1,0 +1,73 @@
+<div class="polaris-background">
+    <div class="snowflake"></div>
+    <div class="snowflake"></div>
+    <div class="snowflake"></div>
+    <div class="ice-refraction"></div>
+</div>
+
+<div class="container-fluid polaris-container">
+    
+    <header class="logo-section">
+        <div class="logo-wrapper">
+            <img src="logo.png" class="logo" alt="Polarís Logo" />
+            <div class="logo-glow"></div>
+        </div>
+        
+        <h1 class="main-title">
+            POLAR<span class="accent-text">Í</span>S
+        </h1>
+        
+        <div class="polaris-divider"></div>
+        
+        <p class="subtitle">
+            <i class="fas fa-snowflake me-2"></i>
+            momentos deliciosos
+            <i class="fas fa-snowflake ms-2"></i>
+        </p>
+    </header>
+
+    <section class="categories-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-ice-cream me-3"></i>
+                Nuestras Categorías
+                <i class="fas fa-mug-hot ms-3"></i>
+            </h2>
+            <p class="section-subtitle">Elige tu experiencia polar favorita</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6" 
+                 *ngFor="let c of listCategoria" 
+                 (click)="seeProduct(c.idCategoria)">
+                
+                <div class="category-card polaris-card">
+                    <div class="card-ice-overlay"></div>
+                    
+                    <div class="category-icon">
+                        <i class="fas fa-3x mb-3" [ngClass]="getIcon(c.nombre)"></i>
+                    </div>
+                    
+                    <h3 class="category-name">{{c.nombre}}</h3>
+                    
+                    <div class="category-hover">
+                        <span class="hover-text">
+                            Ver productos
+                            <i class="fas fa-arrow-right ms-2"></i>
+                        </span>
+                    </div>
+                    
+                    <div class="ice-sparkle"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="polaris-footer">
+        <p class="footer-text">
+            <i class="fas fa-heart me-2"></i>
+            Hecho con amor para los amantes del frío
+            <i class="fas fa-heart ms-2"></i>
+        </p>
+    </footer>
+</div>

@@ -1,0 +1,41 @@
+<!-- ✅ Navbar Cliente (muestra "Bienvenido: [nombre]") -->
+<app-navbar-cliente></app-navbar-cliente>
+
+<!-- ✅ Modal Login DNI GLOBAL (para clientes) -->
+<app-modal-login-dni 
+  *ngIf="modalClienteAbierto$ | async"
+  (cerrar)="cerrarModalCliente()"
+  (loginExitoso)="loginClienteExitoso()">
+</app-modal-login-dni>
+
+<!-- ✅ Notificaciones globales -->
+<app-notification></app-notification>
+
+<!-- ✅ Carrito Flotante (esquina inferior derecha) -->
+<app-carrito-flotante></app-carrito-flotante>
+
+<!-- ✅ Historial Flotante (esquina inferior izquierda) -->
+<app-historial-flotante></app-historial-flotante>
+
+<!-- ✅ Modal Pedido Listo GLOBAL (pantalla completa desde cualquier página) -->
+<app-modal-pedido-listo></app-modal-pedido-listo>
+
+<!-- ✅ Loader global -->
+<app-loader *ngIf="loading$ | async"></app-loader>
+
+<!-- ✅ Efectos visuales -->
+<div class="snow-container">
+  <div class="snowflake">❄️</div>
+  <div class="snowflake">❄️</div>
+  <div class="snowflake">❄️</div>
+  <div class="snowflake">❄️</div>
+  <div class="snowflake">❄️</div>
+  <div class="snowflake">❄️</div>
+  <div class="snowflake">❄️</div>
+  <div class="snowflake">❄️</div>
+  <div class="snowflake">❄️</div>
+  <div class="snowflake">❄️</div>
+</div>
+
+<!-- ✅ Router outlet -->
+<router-outlet></router-outlet>

@@ -1,0 +1,45 @@
+
+.snow-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0; 
+  overflow: hidden;
+}
+
+.snowflake {
+  position: absolute;
+  top: -10%;
+  color: white;
+  user-select: none;
+  cursor: default;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
+  animation: fall linear infinite;
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(0vh) translateX(0px) rotate(0deg);
+    opacity: 0;
+  }
+  10% { opacity: 0.8; }
+  90% { opacity: 0.8; }
+  100% {
+    transform: translateY(110vh) translateX(100px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.snowflake:nth-child(1) { left: 5%;  font-size: 20px; animation-duration: 10s; animation-delay: 0s; }
+.snowflake:nth-child(2) { left: 15%; font-size: 14px; animation-duration: 12s; animation-delay: 2s; }
+.snowflake:nth-child(3) { left: 25%; font-size: 25px; animation-duration: 15s; animation-delay: 4s; opacity: 0.5; }
+.snowflake:nth-child(4) { left: 35%; font-size: 18px; animation-duration: 11s; animation-delay: 1s; }
+.snowflake:nth-child(5) { left: 50%; font-size: 22px; animation-duration: 14s; animation-delay: 5s; }
+.snowflake:nth-child(6) { left: 65%; font-size: 16px; animation-duration: 13s; animation-delay: 3s; }
+.snowflake:nth-child(7) { left: 75%; font-size: 28px; animation-duration: 16s; animation-delay: 0s; opacity: 0.4; }
+.snowflake:nth-child(8) { left: 85%; font-size: 14px; animation-duration: 12s; animation-delay: 6s; }
+.snowflake:nth-child(9) { left: 92%; font-size: 20px; animation-duration: 14s; animation-delay: 2s; }
+.snowflake:nth-child(10){ left: 45%; font-size: 12px; animation-duration: 10s; animation-delay: 7s; }

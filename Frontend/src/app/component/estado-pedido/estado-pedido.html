@@ -1,0 +1,142 @@
+<div class="estado-box polaris-estado">
+  <div class="polaris-header">
+    <i class="bi bi-cup-hot-fill polaris-icon"></i>
+    <h2 class="polaris-title">Estado de tus Pedidos Polarís</h2>
+  </div>
+
+  <!-- ✅ LISTA DE PEDIDOS -->
+  <div class="pedidos-lista" *ngIf="pedidosActivos.length > 0">
+    <div class="lista-header">
+      <h4>Mis Pedidos Activos ({{ getCantidadPedidos() }})</h4>
+    </div>
+
+    <div class="pedidos-container">
+      <div 
+        *ngFor="let pedido of pedidosActivos" 
+        class="pedido-item"
+        [class.activo]="pedidoSeleccionado?.idPedido === pedido.idPedido"
+        (click)="seleccionarPedido(pedido)">
+        
+        <div class="pedido-estado">
+          <span class="badge" [style.background]="getEstadoColor(pedido.estado)">
+            {{ getEstadoIcon(pedido.estado) }} {{ pedido.estado }}
+          </span>
+        </div>
+
+        <div class="pedido-info-mini">
+          <p class="id">#{{ pedido.idPedido?.substring(0, 8) }}</p>
+          <p class="total">S/. {{ pedido.totalPagar }}</p>
+        </div>
+
+        <div class="pedido-tipo">
+          {{ pedido.tipoPedido === 'MESA' ? '🪑 Mesa ' + pedido.mesa : '🛍️ Llevar' }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ DETALLE DEL PEDIDO SELECCIONADO -->
+  <div class="estado-content" *ngIf="pedidoSeleccionado">
+    
+    <!-- MENSAJE DE RECHAZO -->
+    <div *ngIf="cancelacionRechazada && pedidoSeleccionado.estado !== 'FINALIZADO'" 
+         style="background-color: #fff3cd; color: #856404; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center; border: 1px solid #ffeeba;">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <strong> Lo sentimos, ya no lo puedes cancelar.</strong> Gracias por la comprensión.
+    </div>
+
+    <!-- EN ESPERA -->
+    <div class="estado-item" *ngIf="pedidoSeleccionado.estado === 'ESPERA'">
+      <div class="estado-icon espera">
+        <i class="bi bi-clock"></i>
+      </div>
+      <div class="estado-info">
+        <h3 class="estado-text">En espera</h3>
+        <p class="estado-desc">Tu pedido está en cola de espera</p>
+      </div>
+      <div class="estado-time">
+        <span class="time-badge">Próximo</span>
+      </div>
+    </div>
+
+    <!-- PREPARACIÓN -->
+    <div class="estado-item" *ngIf="pedidoSeleccionado.estado === 'PREPARACION' || pedidoSeleccionado.estado === 'PREPARANDO'">
+      <div class="estado-icon preparacion">
+        <i class="bi bi-egg-fried"></i>
+      </div>
+      <div class="estado-info">
+        <h3 class="estado-text">En preparación</h3>
+        <p class="estado-desc">Nuestros baristas están trabajando en tu pedido</p>
+      </div>
+      <div class="estado-progress">
+        <div class="progress-bar">
+          <div class="progress-fill"></div>
+        </div>
+        <span class="progress-text">Preparando...</span>
+      </div>
+    </div>
+
+    <!-- SOLICITUD CANCELACIÓN -->
+    <div class="estado-item" *ngIf="pedidoSeleccionado.estado === 'SOLICITUD_CANCELACION'">
+      <div class="estado-icon cancelacion">
+        <i class="bi bi-x-circle"></i>
+      </div>
+      <div class="estado-info">
+        <h3 class="estado-text">Cancelación en revisión</h3>
+        <p class="estado-desc">Solicitud de cancelación enviada. Esperando respuesta del mostrador...</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER CON ACCIONES -->
+  <div class="polaris-footer" *ngIf="pedidoSeleccionado && (pedidoSeleccionado.estado === 'ESPERA' || pedidoSeleccionado.estado === 'PREPARACION' || pedidoSeleccionado.estado === 'PREPARANDO' || pedidoSeleccionado.estado === 'SOLICITUD_CANCELACION')">
+    <div class="acciones-pedido">
+      <button class="btn-ver-categorias" (click)="verCategorias()">
+        <i class="bi bi-shop"></i> Ver Categorías
+      </button>
+      <button class="btn-cancelar" (click)="abrirModalCancelacion()" *ngIf="!cancelacionRechazada">
+        <i class="bi bi-x-circle"></i> Cancelar Pedido
+      </button>
+    </div>
+  </div>
+
+  <!-- SIN PEDIDOS -->
+  <div class="sin-pedidos" *ngIf="pedidosActivos.length === 0 && !cargando">
+    <i class="bi bi-inbox"></i>
+    <h3>No hay pedidos activos</h3>
+    <p>Ve a ver categorías para hacer un nuevo pedido</p>
+    <button class="btn-ver-categorias-grande" (click)="verCategorias()">
+      <i class="bi bi-shop"></i> Ver Categorías
+    </button>
+  </div>
+
+  <!-- MODAL DE CANCELACIÓN -->
+  <div class="modal-backdrop" *ngIf="mostrarModalCancelacion">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="cancelarPedidoTitulo">
+      <h3 id="cancelarPedidoTitulo">Cancelar pedido</h3>
+      <p>Indica el motivo para que el mostrador pueda revisar la solicitud.</p>
+      <textarea 
+        name="motivoCancelacion"
+        class="form-control" 
+        placeholder="Ej. Cambio de planes, no voy a pasar por el local..." 
+        [(ngModel)]="motivoCancelacion"
+        rows="4">
+      </textarea>
+      <div class="modal-actions">
+        <button class="btn-cancelar-secundario" (click)="cerrarModalCancelacion()">Cerrar</button>
+        <button class="btn-confirmar-cancelacion" (click)="solicitarCancelacion()" [disabled]="cargando">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE ÉXITO -->
+  <div class="modal-backdrop" *ngIf="mostrarModalExito">
+    <div class="modal-dialog" style="text-align: center; padding: 25px;">
+      <i class="bi bi-check-circle-fill" style="font-size: 3rem; color: #28a745;"></i>
+      <h3 style="margin-top: 15px; font-weight: bold;">¡Éxito!</h3>
+      <p style="margin: 0; color: #6c757d;">Tu pedido ha sido procesado correctamente.</p>
+    </div>
+  </div>
+
+</div>

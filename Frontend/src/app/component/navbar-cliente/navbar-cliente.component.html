@@ -1,0 +1,10 @@
+<div class="navbar-cliente" *ngIf="logueado">
+  <div class="navbar-content">
+    <div class="welcome-text">
+      👤 Bienvenido: <strong>{{ nombreCliente }}</strong>
+    </div>
+    <button class="btn-logout" (click)="logout()">
+      Cerrar Sesión
+    </button>
+  </div>
+</div>

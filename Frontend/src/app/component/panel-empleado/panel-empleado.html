@@ -1,0 +1,416 @@
+<div class="pedido-container">
+  <!-- CABECERA DEL PANEL -->
+  <div class="titulo-container">
+    <div class="titulo-icono">
+      <i class="bi bi-cup-hot-fill"></i>
+    </div>
+    <div class="titulo-texto">
+      <h1>Pedidos Activos</h1>
+      <p class="titulo-sub">Polarís Café & Waffles</p>
+    </div>
+    <div class="contador-pedidos">
+      <span class="contador-numero">{{ pedidos.length }}</span>
+      <span class="contador-texto">PEDIDOS</span>
+    </div>
+  </div>
+
+  <!-- ESTADO DE CARGA -->
+  <div *ngIf="cargando" class="estado-carga">
+    <div class="spinner-polaris"></div>
+    <p>Buscando pedidos activos...</p>
+  </div>
+
+  <!-- ESTADO SIN PEDIDOS -->
+  <div *ngIf="!cargando && pedidos.length === 0" class="sin-pedidos">
+    <div class="sin-pedidos-icono">
+      <i class="bi bi-emoji-smile"></i>
+    </div>
+    <h3>¡Todo al día!</h3>
+    <p>No hay pedidos pendientes</p>
+    <small>Los nuevos pedidos aparecerán aquí automáticamente</small>
+  </div>
+
+  <!-- CONTENEDOR DE SECCIONES DE PEDIDOS -->
+  <div *ngIf="!cargando && pedidos.length > 0" class="bloques-pedidos-container">
+    <!-- ========================================== -->
+    <!-- 1. SECCIÓN SUPERIOR: NUEVOS Y EN PREPARACIÓN (INCLUYE CANCELACIONES) -->
+    <!-- ========================================== -->
+    <div class="seccion-pedidos" *ngIf="pedidosNuevos.length > 0">
+      <div class="seccion-header header-nuevos">
+        <i class="bi bi-fire"></i>
+        <h2>Nuevos y en Preparación</h2>
+        <span class="badge-contador bg-nuevos">{{ pedidosNuevos.length }}</span>
+      </div>
+      <div class="pedidos-grid-mejorado">
+        <div class="pedido-tarjeta" 
+             *ngFor="let p of pedidosNuevos"
+             [ngClass]="{'tarjeta-cancelacion-alerta': p.estado === 'SOLICITUD_CANCELACION'}">
+          <!-- CABECERA DE TARJETA -->
+          <div class="pedido-cabecera">
+            <div class="pedido-numero-estado">
+              <span class="estado-pedido" [ngClass]="'estado-' + p.estado?.toLowerCase()">
+                <span *ngIf="p.estado === 'SOLICITUD_CANCELACION'" class="punto-parpadeante"></span>
+                {{ p.estado === 'SOLICITUD_CANCELACION' ? 'SOLICITUD CANCELACIÓN' : p.estado }}
+              </span>
+            </div>
+            
+            <div class="pedido-cliente-hora">
+              <div class="cliente-info">
+                <i class="bi bi-person-circle"></i>
+                <span>{{ p.nombreCliente || 'Cliente' }}</span>
+              </div>
+              <div class="hora-info">
+                <i class="bi bi-clock"></i>
+                {{ p.createdAt | date:'HH:mm' }}
+              </div>
+            </div>
+          </div>
+          
+          <!-- ALERTA DE CANCELACIÓN EN LA TARJETA -->
+          <div *ngIf="p.estado === 'SOLICITUD_CANCELACION'" class="alerta-cancelacion-box">
+            <div class="alerta-header">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              <span>El cliente solicita cancelar:</span>
+            </div>
+            <p class="motivo-texto">"{{ p.motivoCancelacion || 'Sin motivo indicado' }}"</p>
+            
+            <!-- PASO 1: Aceptar / Rechazar -->
+            <div class="acciones-cancelacion-grid" *ngIf="!estaAceptada(p)">
+              <button type="button" class="btn-cancelacion-accion btn-aceptar-canc" (click)="aceptarCancelacionLocal(p)">
+                <i class="bi bi-check-lg"></i> Aceptar
+              </button>
+              <button type="button" class="btn-cancelacion-accion btn-rechazar-canc" (click)="responderCancelacion(p, false)">
+                <i class="bi bi-x-lg"></i> Rechazar
+              </button>
+            </div>
+            <!-- PASO 2: Confirmación de anulación -->
+            <div class="confirmacion-cancelacion-container" *ngIf="estaAceptada(p)">
+              <p class="confirmacion-pregunta">¿Confirmar anulación del pedido?</p>
+              <div class="confirmacion-botones">
+                <button type="button" class="btn-confirmar-anular" (click)="responderCancelacion(p, true)">
+                  <i class="bi bi-trash-fill"></i> Sí, Anular Pedido
+                </button>
+                <button type="button" class="btn-volver-canc" (click)="cancelarConfirmacion(p)">
+                  <i class="bi bi-arrow-return-left"></i> Volver
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- INFORMACIÓN PRINCIPAL -->
+          <div class="pedido-info-principal">
+            <div class="info-item destacado">
+              <div class="info-icono"><i class="bi bi-currency-dollar"></i></div>
+              <div class="info-contenido">
+                <span class="info-label">TOTAL</span>
+                <span class="info-valor">S/. {{ p.totalPagar }}</span>
+              </div>
+            </div>
+            
+            <div class="info-item">
+              <div class="info-icono"><i class="bi bi-wallet2"></i></div>
+              <div class="info-contenido">
+                <span class="info-label">PAGO</span>
+                <span class="info-valor">{{ p.metodoPago }}</span>
+              </div>
+            </div>
+            
+            <div class="info-item" *ngIf="p.mesa">
+              <div class="info-icono"><i class="bi bi-table"></i></div>
+              <div class="info-contenido">
+                <span class="info-label">MESA</span>
+                <span class="info-valor">{{ p.mesa }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RESUMEN DE PRODUCTOS Y ACOMPAÑAMIENTOS EN TARJETA -->
+          <div class="tarjeta-resumen-items" *ngIf="p.items && p.items.length > 0">
+            <div *ngFor="let item of p.items" class="tarjeta-item-linea">
+              <span class="fw-bold">{{ item.cantidad }}x {{ item.nombreProducto }}</span>
+              <div class="item-acompanamiento mt-1" *ngIf="getAcompanamientos(item)">
+                <span class="acomp-etiqueta">🍕 Acompañamientos:</span>
+                <span class="acomp-valor">{{ getAcompanamientos(item) }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- ACCIONES DE TARJETA -->
+          <div class="pedido-acciones">
+            <button type="button" class="btn-detalle" (click)="verDetalle(p)">
+              <i class="bi bi-eye"></i> Ver Detalle
+            </button>
+            
+            <div class="acciones-rapidas" *ngIf="p.estado !== 'SOLICITUD_CANCELACION'">
+              <button type="button" class="btn-accion-rapida btn-preparar"
+                      (click)="cambiarEstado(p, 'PREPARACION')"
+                      [disabled]="p.estado === 'PREPARACION'">
+                <i class="bi bi-play-circle"></i>
+              </button>
+              
+              <button type="button" class="btn-accion-rapida btn-finalizar"
+                      (click)="cambiarEstado(p, 'LISTO')">
+                <i class="bi bi-check2-circle"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. SECCIÓN MEDIA: LISTOS PARA ENTREGAR     -->
+    <!-- ========================================== -->
+    <div class="seccion-pedidos" *ngIf="pedidosListos.length > 0">
+      <div class="seccion-header header-listos">
+        <i class="bi bi-check-circle-fill"></i>
+        <h2>Listos para Entregar</h2>
+        <span class="badge-contador bg-listos">{{ pedidosListos.length }}</span>
+      </div>
+      <div class="pedidos-grid-mejorado">
+        <div class="pedido-tarjeta pedido-listo-tachado" *ngFor="let p of pedidosListos">
+          <!-- OVERLAY DE PEDIDO LISTO -->
+          <div class="tachado-overlay">
+            <div class="tachado-linea"></div>
+            <div class="tachado-texto">
+              <i class="bi bi-check2-circle"></i> LISTO PARA ENTREGAR
+            </div>
+          </div>
+          <div class="pedido-cabecera">
+            <div class="pedido-numero-estado">
+              <span class="estado-pedido estado-listo">LISTO</span>
+            </div>
+            <div class="pedido-cliente-hora">
+              <div class="cliente-info">
+                <i class="bi bi-person-circle"></i>
+                <span>{{ p.nombreCliente || 'Cliente' }}</span>
+              </div>
+              <div class="hora-info">
+                <i class="bi bi-clock"></i>
+                {{ p.createdAt | date:'HH:mm' }}
+              </div>
+            </div>
+          </div>
+          <div class="pedido-info-principal">
+            <div class="info-item destacado">
+              <div class="info-icono"><i class="bi bi-currency-dollar"></i></div>
+              <div class="info-contenido">
+                <span class="info-label">TOTAL</span>
+                <span class="info-valor">S/. {{ p.totalPagar }}</span>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icono"><i class="bi bi-wallet2"></i></div>
+              <div class="info-contenido">
+                <span class="info-label">PAGO</span>
+                <span class="info-valor">{{ p.metodoPago }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RESUMEN DE PRODUCTOS Y ACOMPAÑAMIENTOS EN TARJETA -->
+          <div class="tarjeta-resumen-items" *ngIf="p.items && p.items.length > 0">
+            <div *ngFor="let item of p.items" class="tarjeta-item-linea">
+              <span class="fw-bold">{{ item.cantidad }}x {{ item.nombreProducto }}</span>
+              <div class="item-acompanamiento mt-1" *ngIf="getAcompanamientos(item)">
+                <span class="acomp-etiqueta">🍕 Acompañamientos:</span>
+                <span class="acomp-valor">{{ getAcompanamientos(item) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pedido-acciones">
+            <button type="button" class="btn-detalle" (click)="verDetalle(p)">
+              <i class="bi bi-eye"></i> Ver Detalle
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 3. SECCIÓN INFERIOR: PEDIDOS CANCELADOS    -->
+    <!-- ========================================== -->
+    <div class="seccion-pedidos" *ngIf="pedidosCancelados.length > 0">
+      <div class="seccion-header header-cancelados">
+        <i class="bi bi-x-circle-fill"></i>
+        <h2>Pedidos Cancelados</h2>
+        <span class="badge-contador bg-cancelados">{{ pedidosCancelados.length }}</span>
+      </div>
+      <div class="pedidos-grid-mejorado">
+        <div class="pedido-tarjeta pedido-cancelado-tachado" *ngFor="let p of pedidosCancelados">
+          <!-- OVERLAY DE PEDIDO CANCELADO CON MOTIVO -->
+          <div class="cancelado-overlay">
+            <div class="cancelado-linea"></div>
+            <div class="cancelado-texto">
+              <i class="bi bi-x-circle-fill"></i> PEDIDO CANCELADO
+            </div>
+            <p class="cancelado-motivo-sub">
+              "{{ p.motivoCancelacion || 'Sin motivo especificado' }}"
+            </p>
+          </div>
+          <div class="pedido-cabecera">
+            <div class="pedido-numero-estado">
+              <span class="estado-pedido estado-cancelado">CANCELADO</span>
+            </div>
+            <div class="pedido-cliente-hora">
+              <div class="cliente-info">
+                <i class="bi bi-person-circle"></i>
+                <span>{{ p.nombreCliente || 'Cliente' }}</span>
+              </div>
+              <div class="hora-info">
+                <i class="bi bi-clock"></i>
+                {{ p.createdAt | date:'HH:mm' }}
+              </div>
+            </div>
+          </div>
+          <div class="pedido-info-principal">
+            <div class="info-item destacado">
+              <div class="info-icono"><i class="bi bi-currency-dollar"></i></div>
+              <div class="info-contenido">
+                <span class="info-label">TOTAL</span>
+                <span class="info-valor">S/. {{ p.totalPagar }}</span>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icono"><i class="bi bi-wallet2"></i></div>
+              <div class="info-contenido">
+                <span class="info-label">PAGO</span>
+                <span class="info-valor">{{ p.metodoPago }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RESUMEN DE PRODUCTOS Y ACOMPAÑAMIENTOS EN TARJETA -->
+          <div class="tarjeta-resumen-items" *ngIf="p.items && p.items.length > 0">
+            <div *ngFor="let item of p.items" class="tarjeta-item-linea">
+              <span class="fw-bold">{{ item.cantidad }}x {{ item.nombreProducto }}</span>
+              <div class="item-acompanamiento mt-1" *ngIf="getAcompanamientos(item)">
+                <span class="acomp-etiqueta">🍕 Acompañamientos:</span>
+                <span class="acomp-valor">{{ getAcompanamientos(item) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pedido-acciones">
+            <button type="button" class="btn-detalle" (click)="verDetalle(p)">
+              <i class="bi bi-eye"></i> Ver Detalle
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE DETALLES -->
+  <div class="modal-detalle" *ngIf="pedidoSeleccionado" [ngClass]="{'modal-visible': modalVisible}">
+    <div class="modal-contenido">
+      <div class="modal-header">
+        <h3>
+          <i class="bi bi-receipt"></i>
+          Detalle del Pedido
+        </h3>
+        <button type="button" class="btn-cerrar" (click)="cerrarModal()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="detalle-cliente">
+          <div class="detalle-item">
+            <i class="bi bi-person"></i>
+            <span>{{ pedidoSeleccionado.nombreCliente }}</span>
+          </div>
+          <div class="detalle-item">
+            <i class="bi bi-clock-history"></i>
+            <span>{{ pedidoSeleccionado.createdAt | date:'HH:mm' }}</span>
+          </div>
+          <div class="detalle-item">
+            <i class="bi bi-credit-card"></i>
+            <span>{{ pedidoSeleccionado.metodoPago }}</span>
+          </div>
+          <div class="detalle-item" *ngIf="pedidoSeleccionado.mesa">
+            <i class="bi bi-geo-alt"></i>
+            <span>Mesa {{ pedidoSeleccionado.mesa }}</span>
+          </div>
+        </div>
+        
+        <!-- ALERTA DE CANCELACIÓN EN EL MODAL -->
+        <div *ngIf="pedidoSeleccionado.estado === 'SOLICITUD_CANCELACION'" class="alerta-cancelacion-box">
+          <div class="alerta-header">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span>Solicitud de Cancelación</span>
+          </div>
+          <p class="motivo-texto">"{{ pedidoSeleccionado.motivoCancelacion || 'Sin motivo indicado' }}"</p>
+          
+          <div class="acciones-cancelacion-grid" *ngIf="!estaAceptada(pedidoSeleccionado)">
+            <button type="button" class="btn-cancelacion-accion btn-aceptar-canc" (click)="aceptarCancelacionLocal(pedidoSeleccionado)">
+              <i class="bi bi-check-lg"></i> Aceptar
+            </button>
+            <button type="button" class="btn-cancelacion-accion btn-rechazar-canc" (click)="responderCancelacion(pedidoSeleccionado, false)">
+              <i class="bi bi-x-lg"></i> Rechazar
+            </button>
+          </div>
+          <div class="confirmacion-cancelacion-container" *ngIf="estaAceptada(pedidoSeleccionado)">
+            <p class="confirmacion-pregunta">¿Confirmar anulación del pedido?</p>
+            <div class="confirmacion-botones">
+              <button type="button" class="btn-confirmar-anular" (click)="responderCancelacion(pedidoSeleccionado, true)">
+                <i class="bi bi-trash-fill"></i> Sí, Anular Pedido
+              </button>
+              <button type="button" class="btn-volver-canc" (click)="cancelarConfirmacion(pedidoSeleccionado)">
+                <i class="bi bi-arrow-return-left"></i> Volver
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="detalle-items">
+          <h4><i class="bi bi-list-check"></i> Productos</h4>
+          <div class="items-lista">
+            <div class="item-detalle" *ngFor="let item of pedidoSeleccionado.items">
+              <div class="item-info">
+                <div class="item-nombre">{{ item.nombreProducto }}</div>
+                <div class="item-cantidad">x{{ item.cantidad }}</div>
+                <!-- ✅ MOSTRAR ACOMPAÑAMIENTOS EN MODAL -->
+                <div class="item-acompanamiento" *ngIf="getAcompanamientos(item)">
+                  <span class="acomp-etiqueta">🍕 Acompañamientos:</span>
+                  <span class="acomp-valor">{{ getAcompanamientos(item) }}</span>
+                </div>
+              </div>
+              <div class="item-precio">S/. {{ item.precioUnitarioFinal * item.cantidad | number:'1.2-2' }}</div>
+            </div>
+          </div>
+          
+          <div class="detalle-total">
+            <span>TOTAL A PAGAR</span>
+            <span class="total-monto">S/. {{ pedidoSeleccionado.totalPagar }}</span>
+          </div>
+        </div>
+        
+        <div class="detalle-estado" *ngIf="pedidoSeleccionado.estado !== 'SOLICITUD_CANCELACION' && pedidoSeleccionado.estado !== 'CANCELADO'">
+          <h4><i class="bi bi-arrow-repeat"></i> Cambiar Estado</h4>
+          <div class="estado-opciones">
+            <button type="button" class="btn-estado-modal btn-espera"
+                    (click)="cambiarEstado(pedidoSeleccionado, 'ESPERA')"
+                    [ngClass]="{'activo': pedidoSeleccionado.estado === 'ESPERA'}">
+              <i class="bi bi-pause-circle"></i> Espera
+            </button>
+            
+            <button type="button" class="btn-estado-modal btn-preparando"
+                    (click)="cambiarEstado(pedidoSeleccionado, 'PREPARACION')"
+                    [ngClass]="{'activo': pedidoSeleccionado.estado === 'PREPARACION'}">
+              <i class="bi bi-play-circle"></i> Preparando
+            </button>
+            
+            <button type="button" class="btn-estado-modal btn-listomodal"
+                    (click)="cambiarEstado(pedidoSeleccionado, 'LISTO')"
+                    [ngClass]="{'activo': pedidoSeleccionado.estado === 'LISTO'}">
+              <i class="bi bi-check2-circle"></i> Listo
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-overlay" (click)="cerrarModal()"></div>
+  </div>
+</div>

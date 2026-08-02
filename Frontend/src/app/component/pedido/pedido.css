@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+
+:root {
+  --polaris-blue: #007cf0;
+  --polaris-cyan: #00dfd8;
+  --deep-arctic: #0a192f;
+  --ice-bg: #f4f7fa;
+}
+
+body {
+  background-color: var(--ice-bg) !important;
+  font-family: 'Outfit', sans-serif;
+  color: var(--deep-arctic);
+}
+
+.header-container {
+  padding: 50px 0 20px;
+}
+
+.main-title {
+  font-weight: 800;
+  font-size: 4rem;
+  color: var(--deep-arctic) !important; 
+  letter-spacing: -2px;
+}
+
+.text-gradient {
+  background: linear-gradient(to right, #004e92, #00c6ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #007cf0; 
+  display: inline-block;
+}
+
+.card {
+  border: none !important;
+  border-radius: 30px !important;
+  background: #ffffff !important;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.05) !important;
+}
+
+.mt-5.p-4.rounded-4.bg-light {
+  background: var(--deep-arctic) !important;
+  border-radius: 25px !important;
+  padding: 30px !important;
+  box-shadow: 0 10px 25px rgba(88, 115, 156, 0.2);
+}
+
+.mt-5.p-4.rounded-4.bg-light span.text-muted {
+  color: rgba(73, 5, 233, 0.7) !important; 
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+.total-price {
+  color: #413b96 !important; 
+  font-weight: 800;
+  font-size: 3.5rem !important;
+  margin-top: 5px;
+  display: block;
+}
+
+.btn-table {
+  width: 50px;
+  height: 50px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-weight: 700;
+  background: white;
+  transition: 0.3s;
+}
+
+.btn-table.seleccionada {
+  background: var(--polaris-blue) !important;
+  color: white !important;
+  border-color: var(--polaris-blue);
+}
+
+/* ✅ BOTÓN CONFIRMAR - ESTADOS */
+.btn-confirm-order {
+  background: linear-gradient(135deg, #004e92 0%, #000428 100%) !important;
+  border: none !important;
+  border-radius: 20px !important;
+  padding: 20px !important;
+  font-size: 1.2rem !important;
+  font-weight: 800 !important;
+  color: white !important;
+  box-shadow: 0 15px 30px rgba(0, 78, 146, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-confirm-order:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 40px rgba(0, 78, 146, 0.4) !important;
+}
+
+.btn-confirm-order:disabled {
+  background: linear-gradient(135deg, #bdbdbd 0%, #9e9e9e 100%) !important;
+  border: none !important;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1) !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+}
+
+.btn-confirm-order:disabled:hover {
+  transform: none !important;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.form-control-lg {
+  border: 2px solid #f1f4f8 !important;
+  border-radius: 15px !important;
+  background: #f8fafc !important;
+}

@@ -1,0 +1,78 @@
+<body>
+    <!-- Formas decorativas flotantes -->
+    <div class="floating-shape shape-1"></div>
+    <div class="floating-shape shape-2"></div>
+    <div class="floating-shape shape-3"></div>
+
+    <!-- Estrellas decorativas -->
+    <div class="star star-1">✨</div>
+    <div class="star star-2">💫</div>
+    <div class="star star-3">⭐</div>
+    <div class="star star-4">✨</div>
+
+    <!-- Contenedor de Login -->
+    <div class="login-container">
+        <!-- Logo y Título -->
+        <div class="logo-container">
+            <div class="logo">
+                <i class="fas fa-sparkles"></i>
+            </div>
+            <h1 class="logo-title">POLARIS</h1>
+            <p class="logo-subtitle">Sistema de Gestión 🍕</p>
+        </div>
+
+        <!-- Formulario de Login -->
+        <form [formGroup]="formUser" (ngSubmit)="login()">
+            <!-- Usuario -->
+            <div class="mb-4">
+                <label class="form-label">Usuario</label>
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input
+                        type="text"
+                        class="form-control"
+                        formControlName="nombre"
+                        placeholder="Ingresa tu usuario"
+                        [disabled]="loading"
+                        autocomplete="username">
+                </div>
+                <small *ngIf="nombreFb.touched && nombreFb.invalid" class="error-text">
+                    ⚠️ Mínimo 3 caracteres
+                </small>
+            </div>
+
+            <!-- Contraseña -->
+            <div class="mb-3">
+                <label class="form-label">Contraseña</label>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input
+                        type="password"
+                        class="form-control"
+                        formControlName="password"
+                        placeholder="Ingresa tu contraseña"
+                        [disabled]="loading"
+                        autocomplete="current-password">
+                </div>
+                <small *ngIf="passwordFb.touched && passwordFb.invalid" class="error-text">
+                    ⚠️ Mínimo 4 caracteres
+                </small>
+            </div>
+
+            <!-- Botón Login -->
+            <button
+                type="submit"
+                class="btn-login"
+                [disabled]="formUser.invalid || loading">
+                <span *ngIf="loading" class="spinner"></span>
+                {{ loading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
+            </button>
+        </form>
+
+        <!-- Link a Categorías -->
+        <div class="footer-login">
+            <p>¿Quieres explorar primero?</p>
+            <a routerLink="/categoria" class="link-categories">Ver Categorías →</a>
+        </div>
+    </div>
+</body>

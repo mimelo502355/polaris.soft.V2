@@ -1,0 +1,134 @@
+<form class="container py-5" [formGroup]="formPedido">
+  <div class="row justify-content-center">
+    <div class="col-lg-11">
+      <div class="header-container text-center mb-5">
+        <span class="badge rounded-pill bg-light text-primary px-3 py-2 mb-2 fw-bold border">POLARIS COFFEE & EXPERIENCE</span>
+        <h1 class="main-title">Finalizar <span class="text-gradient">Pedido</span></h1>
+        <div class="title-divider"></div>
+        <p class="text-muted mt-3 fs-5">Tu expedición ártica está a punto de comenzar</p>
+      </div>
+
+      <div class="row g-4">
+        
+        <div class="col-md-5">
+          <div class="card h-100">
+            <div class="card-body p-4">
+              <h4 class="fw-bold mb-4 d-flex align-items-center">
+                <span class="me-2">🧊</span> Resumen del pedido
+              </h4>
+              
+              <div class="order-items-list">
+                <div class="item d-flex justify-content-between align-items-center mb-3 p-2 rounded-3 border-bottom border-light" *ngFor="let item of carrito">
+                  <span class="item-badge">{{ item.cantidad }}</span>
+                  <div>
+                    <h6 class="mb-0 fw-600">{{ item.nombre }}</h6>
+                    <small class="text-muted" *ngIf="item.toppings?.length">Con toppings adicionales</small>
+                  </div>
+                  <span class="item-badge">S/. {{ item.precioBase }}</span>
+                </div>
+              </div>
+
+              <div class="mt-5 p-4 rounded-4 bg-light text-center shadow-sm">
+                <span class="text-muted fw-bold text-uppercase small">Total a pagar</span>
+                <h2 class="total-price mb-0">S/. {{ total }}</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-7">
+          
+          <div class="card mb-4">
+            <div class="card-body p-4">
+              <h5 class="fw-bold mb-3 d-flex align-items-center">
+                <span class="me-2">👤</span> Datos del explorador
+              </h5>
+              <input type="text" class="form-control form-control-lg" 
+                     formControlName="nombreCliente" placeholder="Ingresa tu nombre completo">
+            </div>
+          </div>
+
+          <div class="card mb-4">
+            <div class="card-body p-4">
+              <h5 class="fw-bold mb-3 d-flex align-items-center">
+                <span class="me-2">🏔️</span> Destino de entrega
+              </h5>
+              <div class="btn-group w-100 shadow-sm rounded-4 overflow-hidden" role="group">
+                <input type="radio" class="btn-check" value="LLEVAR" formControlName="tipoPedido" id="llevar">
+                <label class="btn btn-outline-primary py-3 fw-bold border-0" for="llevar">Para llevar</label>
+
+                <input type="radio" class="btn-check" value="MESA" formControlName="tipoPedido" id="mesa">
+                <label class="btn btn-outline-primary py-3 fw-bold border-0" for="mesa">(Mesa)</label>
+              </div>
+
+              <div *ngIf="formPedido.value.tipoPedido === 'MESA'" class="mt-4 animate__animated animate__fadeIn">
+                <p class="small fw-bold text-muted mb-3 text-center">Selecciona tu ubicación:</p>
+                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                  <button type="button" *ngFor="let m of mesas"
+                    [disabled]="m.ocupada"
+                    class="btn btn-table"
+                    [class.seleccionada]="formPedido.value.mesa === m.numero"
+                    (click)="formPedido.patchValue({ mesa: m.numero })">
+                    {{ m.numero }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mb-4">
+            <div class="card-body p-4">
+              <h5 class="fw-bold mb-3 d-flex align-items-center">
+                <span class="me-2">💳</span> Método de pago
+              </h5>
+              <div class="row g-3">
+                <div class="col-6">
+                  <label class="payment-option w-100" [class.active]="formPedido.value.metodoPago === 'EFECTIVO'">
+                    <input type="radio" value="EFECTIVO" formControlName="metodoPago" class="d-none">
+                    <div class="text-center p-3 border shadow-sm">
+                      <div class="fs-2">💵</div>
+                      <div class="small fw-800 mt-1">Efectivo</div>
+                    </div>
+                  </label>
+                </div>
+                <div class="col-6">
+                  <label class="payment-option w-100" [class.active]="formPedido.value.metodoPago === 'YAPE'">
+                    <input type="radio" value="YAPE" formControlName="metodoPago" class="d-none">
+                    <div class="text-center p-3 border shadow-sm">
+                      <div class="fs-2">📱</div>
+                      <div class="small fw-800 mt-1">Yape</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div class="mt-4">
+                <div *ngIf="formPedido.value.metodoPago === 'YAPE'" class="alert alert-info border-0 rounded-4 p-3 shadow-sm">
+                  <div class="d-flex align-items-center">
+                    <div class="fs-4 me-3">❄️</div>
+                    <div>
+                      <p class="mb-0 fw-bold">Yapea al numero:</p>
+                      <p class="mb-0 fs-5 fw-800">984 045 034</p>
+                      <small class="opacity-75">Titular: Jennifer</small>
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="formPedido.value.metodoPago === 'EFECTIVO'" class="alert alert-secondary border-0 rounded-4 p-3 shadow-sm">
+                  <p class="mb-0">💳 Por favor, acércate a la caja principal para realizar el pago.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-confirm-order btn-lg w-100 py-3 mt-2 shadow-lg" 
+        type="button" 
+        (click)="insert()"
+        [disabled]="!carrito || carrito.length === 0 || total === 0 || total === null">
+  {{ carrito && carrito.length > 0 && total > 0 ? 'CONFIRMAR PEDIDO POLARIS ❄️' : 'CARRITO VACÍO (Agrega productos)' }}
+</button>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

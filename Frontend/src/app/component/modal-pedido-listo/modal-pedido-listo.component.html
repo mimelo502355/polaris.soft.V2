@@ -1,0 +1,44 @@
+<!-- ✅ MODAL A PANTALLA COMPLETA CON BOTÓN CERRAR -->
+<div *ngIf="mostrarModal && pedidoListo" class="modal-listo-overlay" (click)="cerrar()">
+  <div class="modal-listo-contenedor" (click)="$event.stopPropagation()">
+    
+    <!-- ✅ BOTÓN CERRAR (X) -->
+    <button class="btn-cerrar-modal" (click)="cerrar()" title="Cerrar">
+      <i class="bi bi-x-lg"></i>
+    </button>
+
+    <div class="modal-listo-icono">
+      <i class="bi bi-check-circle-fill"></i>
+    </div>
+
+    <h1 class="modal-listo-titulo">¡PEDIDO LISTO!</h1>
+    <p class="modal-listo-subtitle">Tu comida está lista para recoger</p>
+
+    <div class="modal-listo-info">
+      <div class="info-item">
+        <span class="info-label">Pedido #:</span>
+        <span class="info-value">{{ pedidoListo?.idPedido?.substring(0, 8) }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Total:</span>
+        <span class="info-value precio">S/. {{ pedidoListo?.totalPagar }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Tipo:</span>
+        <span class="info-value">
+          {{ pedidoListo?.tipoPedido === 'MESA' ? '🪑 Mesa ' + pedidoListo?.mesa : '🛍️ Para llevar' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="modal-listo-mensaje">
+      <p>⏰ Acércate al mostrador para recoger tu pedido</p>
+    </div>
+
+    <button class="btn-aceptar" (click)="aceptarPedidoListo()" [disabled]="cargando">
+      <i class="bi bi-check-lg"></i> ACEPTAR
+    </button>
+
+    <div class="pulse-ring"></div>
+  </div>
+</div>

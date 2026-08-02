@@ -1,0 +1,128 @@
+<div class="container my-4">
+  <div class="row g-4">
+
+    <div class="col-lg-3 col-md-4 col-sm-6" *ngFor="let p of listProducto">
+      <div class="card product-card h-100 position-relative">
+
+        <div class="img-container">
+          <!-- 🔹 Se pasa 'p' en lugar de 'p.idProducto' -->
+          <img [src]="getImagenProducto(p)" alt="{{ p.nombre }}" class="product-image" />
+        </div>
+
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-center mb-2">{{ p.nombre }}</h5>
+          <p class="card-text text-muted small text-center mb-3">{{ p.descripcion }}</p>
+          <p class="price text-center mb-3">S/. {{ p.precioBase }}</p>
+
+          <div *ngIf="!mostrarExtras[p.idProducto] || productoMostrandoExtras !== p.idProducto">
+            <button type="button" class="btn btn-add mt-auto w-100" (click)="mostrarOpciones(p)">
+              Agregar al carrito
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="mostrarExtras[p.idProducto] && idCategoria === ID_WAFFLE && productoMostrandoExtras === p.idProducto" 
+             class="extras-overlay">
+          
+          <div class="extras-content">
+            <div class="extras-header">
+              <h6 class="mb-0">Personalizar {{ p.nombre }}</h6>
+              <button type="button" class="btn-close-extras" 
+                      (click)="mostrarExtras[p.idProducto] = false; productoMostrandoExtras = null">
+                &times;
+              </button>
+            </div>
+            
+            <div class="extras-body">
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <p class="extras-title mb-0">Salsas (opcional)</p>
+                  <span class="badge bg-info">
+                    {{ (selectedSalsas[p.idProducto] || []).length }}/{{ limits[p.idProducto]?.maxSalsas || 0 }}
+                  </span>
+                </div>
+                
+                <div *ngIf="listSalsas[p.idProducto].length > 0; else noSalsas" class="salsas-container">
+                  <div class="extras-item" *ngFor="let s of listSalsas[p.idProducto]; let i = index">
+                    <input
+                      type="checkbox"
+                      class="form-check-input"
+                      [id]="'salsa-' + p.idProducto + '-' + i"
+                      [checked]="selectedSalsas[p.idProducto]?.includes(s.idAcompanamiento)"
+                      (change)="toggleSalsa(p.idProducto, s.idAcompanamiento)"
+                      [disabled]="
+                        !selectedSalsas[p.idProducto]?.includes(s.idAcompanamiento) &&
+                        ((selectedSalsas[p.idProducto]?.length || 0) >= (limits[p.idProducto]?.maxSalsas || 999))
+                      "
+                    />
+                    <label class="form-check-label" [for]="'salsa-' + p.idProducto + '-' + i">
+                      {{ s.nombreAcompanamiento }}
+                    </label>
+                  </div>
+                </div>
+                
+                <ng-template #noSalsas>
+                  <div class="alert alert-warning small p-2 mb-0">
+                    No hay salsas disponibles
+                  </div>
+                </ng-template>
+              </div>
+
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <p class="extras-title mb-0">Toppings (opcional)</p>
+                  <span class="badge bg-info">
+                    {{ (selectedToppings[p.idProducto] || []).length }}/{{ limits[p.idProducto]?.maxToppings || 0 }}
+                  </span>
+                </div>
+                
+                <div *ngIf="listTopping[p.idProducto].length > 0; else noToppings" class="toppings-container">
+                  <div class="extras-item" *ngFor="let t of listTopping[p.idProducto]; let i = index">
+                    <input
+                      type="checkbox"
+                      class="form-check-input"
+                      [id]="'topping-' + p.idProducto + '-' + i"
+                      [checked]="selectedToppings[p.idProducto]?.includes(t.idAcompanamiento)"
+                      (change)="toggleTopping(p.idProducto, t.idAcompanamiento)"
+                      [disabled]="
+                        !selectedToppings[p.idProducto]?.includes(t.idAcompanamiento) &&
+                        ((selectedToppings[p.idProducto]?.length || 0) >= (limits[p.idProducto]?.maxToppings || 999))
+                      "
+                    />
+                    <label class="form-check-label" [for]="'topping-' + p.idProducto + '-' + i">
+                      {{ t.nombreAcompanamiento }}
+                    </label>
+                  </div>
+                </div>
+                
+                <ng-template #noToppings>
+                  <div class="alert alert-warning small p-2 mb-0">
+                    No hay toppings disponibles
+                  </div>
+                </ng-template>
+              </div>
+            </div>
+            
+            <div class="extras-footer">
+              <button type="button" class="btn btn-confirm w-100 mb-2" (click)="confirmarAgregar(p)">
+                Confirmar pedido
+              </button>
+              <button type="button" class="btn btn-cancel w-100" 
+                      (click)="mostrarExtras[p.idProducto] = false; productoMostrandoExtras = null">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="text-center mt-4">
+    <button type="button" class="btn btn-cart" [routerLink]="['/cat']">
+      Ver Categorias
+    </button>
+  </div>
+</div>

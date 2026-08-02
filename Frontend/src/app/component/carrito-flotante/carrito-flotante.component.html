@@ -1,0 +1,82 @@
+<div class="carrito-flotante" *ngIf="items.length > 0">
+  
+  <!-- BOTÓN FLOTANTE -->
+  <div class="carrito-btn" (click)="toggleDetalle()" title="Ver carrito">
+    <div class="carrito-icon">🛒</div>
+    <div class="carrito-badge">{{ getCantidadTotal() }}</div>
+  </div>
+
+  <!-- PANEL DETALLE -->
+  <div *ngIf="mostrarDetalle" class="carrito-panel">
+    
+    <!-- HEADER -->
+    <div class="panel-header">
+      <h3>Tu Carrito</h3>
+      <button class="btn-close" (click)="cerrarPanel()">✕</button>
+    </div>
+
+    <!-- ITEMS -->
+    <div class="panel-items">
+      <div *ngFor="let item of items; let i = index" class="item-card">
+        
+        <!-- NOMBRE Y DESCRIPCIÓN -->
+        <div class="item-info">
+          <span class="item-nombre">{{ item.nombre }}</span>
+          <span class="item-extras" *ngIf="item.salsas?.length || item.toppings?.length">
+            <small *ngIf="item.salsas?.length">
+              🌶️ {{ item.salsas.join(', ') }}
+            </small>
+            <small *ngIf="item.toppings?.length">
+              ⭐ {{ item.toppings.join(', ') }}
+            </small>
+          </span>
+        </div>
+
+        <!-- PRECIO UNITARIO -->
+        <span class="item-precio-unitario">S/. {{ item.precioBase.toFixed(2) }}</span>
+
+        <!-- CONTROLES DE CANTIDAD -->
+        <div class="item-controles">
+          <button class="btn-menos" (click)="disminuir(i)" title="Disminuir cantidad">
+            <i class="bi bi-dash-circle"></i>
+          </button>
+          
+          <span class="item-cantidad">{{ item.cantidad }}</span>
+          
+          <button class="btn-mas" (click)="aumentar(i)" title="Aumentar cantidad">
+            <i class="bi bi-plus-circle"></i>
+          </button>
+        </div>
+
+        <!-- PRECIO TOTAL DEL ITEM -->
+        <span class="item-precio-total">
+          S/. {{ (item.precioBase * item.cantidad).toFixed(2) }}
+        </span>
+
+        <!-- BOTÓN ELIMINAR -->
+        <button class="btn-eliminar" (click)="eliminar(i)" title="Eliminar del carrito">
+          <i class="bi bi-trash"></i>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- TOTAL -->
+    <div class="panel-total">
+      <span>Total:</span>
+      <span class="precio-total">S/. {{ getTotal().toFixed(2) }}</span>
+    </div>
+
+    <!-- BOTONES -->
+    <div class="panel-botones">
+      <button class="btn-continuar" (click)="volverACategorias()">
+        ← Continuar Comprando
+      </button>
+      <button class="btn-pedido" (click)="irAPedido()">
+        Ir al Pedido →
+      </button>
+    </div>
+
+  </div>
+
+</div>

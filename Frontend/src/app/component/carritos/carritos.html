@@ -1,0 +1,72 @@
+<div class="container my-4">
+  <div class="carrito-card">
+
+    <div class="carrito-header text-center mb-4">
+      <h2>
+        <i class="bi bi-cart-check-fill"></i>
+        Mi carrito
+      </h2>
+      <p class="subtitle">Revisa tu pedido</p>
+    </div>
+
+    <div *ngIf="items.length === 0" class="carrito-vacio">
+      <i class="bi bi-emoji-frown"></i>
+      <p>Tu carrito está vacío</p>
+      <small>Elige algo delicioso ☕🍰</small>
+    </div>
+
+    <div *ngIf="items.length > 0">
+
+      <div class="item-carrito d-flex align-items-center"
+           *ngFor="let item of items; let i = index">
+
+        <div class="item-img-box">
+          <img [src]="item.imagen" />
+        </div>
+
+        <div class="item-info flex-grow-1">
+          <h6>{{ item.nombre }}</h6>
+          <span class="precio">S/. {{ item.precioBase }}</span>
+
+          <div *ngIf="item.salsas.length" class="extras">
+            <small>Salsas:</small>
+            <span *ngFor="let s of item.salsas">{{ s }}</span>
+          </div>
+
+          <div *ngIf="item.toppings.length" class="extras">
+            <small>Toppings:</small>
+            <span *ngFor="let t of item.toppings">{{ t }}</span>
+          </div>
+        </div>
+
+        <div class="item-actions text-center">
+          <div class="cantidad-control">
+            <button (click)="disminuir(i)">−</button>
+            <span>{{ item.cantidad }}</span>
+            <button (click)="aumentar(i)">+</button>
+          </div>
+
+          <button class="btn btn-remove mt-2"
+                  (click)="eliminar(i)">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <div class="resumen">
+        <div class="resumen-total">
+          <span>Total</span>
+          <strong>S/. {{ total() }}</strong>
+        </div>
+
+        <button class="btn btn-comprar-grande"
+                [routerLink]="['/pedido']">
+          <i class="bi bi-credit-card-2-front"></i>
+          Comprar ahora
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

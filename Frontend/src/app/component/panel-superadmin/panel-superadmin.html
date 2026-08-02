@@ -1,0 +1,442 @@
+<div class="superadmin-shell">
+  <!-- Sidebar Principal (Fijo como en tu CSS original) -->
+  <aside class="superadmin-sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">⚡</div>
+      <div class="brand-text">
+        <span>Polaris</span>
+        <small>SuperAdmin</small>
+      </div>
+    </div>
+
+    <nav class="sidebar-menu">
+      <button 
+        type="button" 
+        class="menu-item" 
+        [class.active]="section === 'dashboard'" 
+        (click)="selectSection('dashboard')">
+        <span class="icon">📊</span> Dashboard
+      </button>
+      <button 
+        type="button" 
+        class="menu-item" 
+        [class.active]="section === 'empleados'" 
+        (click)="selectSection('empleados')">
+        <span class="icon">👥</span> Gestión de empleados
+      </button>
+      <button 
+        type="button" 
+        class="menu-item" 
+        [class.active]="section === 'productos'" 
+        (click)="selectSection('productos')">
+        <span class="icon">🍔</span> Gestión de productos
+      </button>
+      <button 
+        type="button" 
+        class="menu-item" 
+        [class.active]="section === 'ventas'" 
+        (click)="selectSection('ventas')">
+        <span class="icon">📈</span> Ventas y estadísticas
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="logout-button" type="button" (click)="logout()">
+        🚪 Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- Contenido Principal -->
+  <main class="superadmin-main">
+    
+    <!-- Topbar Superior -->
+    <header class="admin-topbar">
+      <div class="topbar-title">
+        <p class="eyebrow">PANEL DE CONTROL</p>
+        <h1>
+          {{ section === 'dashboard' ? 'Dashboard General' : 
+             section === 'empleados' ? 'Gestión de Empleados' : 
+             section === 'productos' ? 'Catálogo de Productos' : 'Reporte de Ventas' }}
+        </h1>
+      </div>
+      <button class="primary-btn export-btn" type="button" (click)="exportSectionData()">
+        📥 Exportar Excel
+      </button>
+    </header>
+
+    <!-- VISTA 1: DASHBOARD -->
+    <section *ngIf="section === 'dashboard'" class="dashboard-view">
+      <div class="stats-grid">
+        <article class="stat-card dark">
+          <span class="stat-label">Ingresos hoy</span>
+          <strong class="stat-value">S/. {{ totalHoy | number:'1.2-2' }}</strong>
+          <p class="stat-desc">Ventas procesadas hoy</p>
+        </article>
+        
+        <article class="stat-card">
+          <span class="stat-label">Empleados</span>
+          <strong class="stat-value">{{ totalEmpleados }}</strong>
+          <p class="stat-desc">{{ empleadosActivos }} activos</p>
+        </article>
+        
+        <article class="stat-card">
+          <span class="stat-label">Productos</span>
+          <strong class="stat-value">{{ totalProductos }}</strong>
+          <p class="stat-desc">{{ totalCategorias }} categorías</p>
+        </article>
+        
+        <article class="stat-card">
+          <span class="stat-label">Ventas Rango</span>
+          <strong class="stat-value">S/. {{ totalVentasSemana | number:'1.2-2' }}</strong>
+          <p class="stat-desc">Sumatoria del filtro activo</p>
+        </article>
+      </div>
+
+      <div class="dashboard-panels">
+        <div class="panel-card mini-panel">
+          <h2>⭐ Producto estrella</h2>
+          <strong class="highlight-text">{{ topProductoNombre }}</strong>
+          <p class="panel-note">Producto más vendido según registros del sistema.</p>
+        </div>
+
+        <div class="panel-card mini-panel">
+          <h2>⚡ Acciones rápidas</h2>
+          <ul class="quick-actions-list">
+            <li (click)="selectSection('empleados')">👥 Crear o gestionar empleados</li>
+            <li (click)="selectSection('productos')">🍔 Agregar o editar productos</li>
+            <li (click)="selectSection('ventas')">📊 Ver reporte detallado de ventas</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISTA 2: EMPLEADOS -->
+    <section *ngIf="section === 'empleados'" class="panel-grid">
+      <!-- Formulario Empleados -->
+      <article class="panel-card">
+        <div class="section-header">
+          <h2>{{ modoEdicionEmpleado ? '✏️ Editar Empleado' : '➕ Nuevo Empleado' }}</h2>
+        </div>
+        <form [formGroup]="formEmpleado" (ngSubmit)="guardarEmpleado()" class="form-grid">
+          <label>
+            <span>Nombre completo</span>
+            <input type="text" formControlName="nombre" placeholder="Ej. Juan Pérez" />
+          </label>
+
+          <label>
+            <span>Contraseña {{ modoEdicionEmpleado ? '(opcional)' : '' }}</span>
+            <input type="password" formControlName="password" placeholder="••••••••" />
+          </label>
+
+          <label>
+            <span>Rol del empleado</span>
+            <select formControlName="rol">
+              <option value="EMPLEADO">Empleado</option>
+              <option value="SUPERADMIN">Super Admin</option>
+            </select>
+          </label>
+
+          <div class="form-actions">
+            <button type="submit" class="primary-btn" [disabled]="formEmpleado.invalid">
+              {{ modoEdicionEmpleado ? 'Actualizar' : 'Guardar' }}
+            </button>
+            <button *ngIf="modoEdicionEmpleado" type="button" class="secondary-btn" (click)="cancelarEdicionEmpleado()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </article>
+
+      <!-- Tabla Empleados con CSS Grid -->
+      <article class="panel-card">
+        <div class="section-header">
+          <h2>Lista de empleados ({{ empleados.length }})</h2>
+          <button class="secondary-btn" type="button" (click)="exportEmpleadosCsv()">📥 Excel Empleados</button>
+        </div>
+
+        <div class="table-container">
+          <div class="table-grid table-header-empleados">
+            <span>Nombre</span>
+            <span>Rol</span>
+            <span>Estado</span>
+            <span class="text-right">Acciones</span>
+          </div>
+
+          <div *ngIf="empleados.length === 0" class="empty-state">
+            No hay empleados registrados.
+          </div>
+
+          <div class="table-grid table-row-empleados" *ngFor="let empleado of empleados; trackBy: trackByEmpleadoId">
+            <span class="font-medium">{{ empleado.nombre }}</span>
+            
+            <div>
+              <span class="badge badge-role">{{ empleado.rol || 'EMPLEADO' }}</span>
+            </div>
+
+            <div>
+              <span class="badge-status" [class.active]="empleado.activo !== false && empleado.estado !== false">
+                {{ (empleado.activo !== false && empleado.estado !== false) ? '● Activo' : '○ Inactivo' }}
+              </span>
+            </div>
+
+            <div class="action-buttons">
+              <button type="button" class="btn-action edit" (click)="prepararEditarEmpleado(empleado)">
+                ✏️ Editar
+              </button>
+              
+              <button 
+                type="button" 
+                (click)="desactivarEmpleado(empleado)" 
+                [class]="(empleado.activo !== false && empleado.estado !== false) ? 'btn-action toggle-off' : 'btn-action toggle-on'"
+                [disabled]="empleado.nombre?.toLowerCase() === 'admin'">
+                {{ (empleado.activo !== false && empleado.estado !== false) ? 'Desactivar' : 'Activar' }}
+              </button>
+
+              <button 
+                *ngIf="empleado.nombre?.toLowerCase() !== 'admin' && empleado.rol !== 'SUPERADMIN'" 
+                type="button" 
+                class="danger-btn" 
+                (click)="eliminarEmpleado(empleado)">
+                🗑️ Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- VISTA 3: PRODUCTOS -->
+    <section *ngIf="section === 'productos'" class="panel-grid">
+      <!-- Formulario Productos -->
+      <article class="panel-card">
+        <div class="section-header">
+          <h2>{{ modoEdicionProducto ? '✏️ Editar Producto' : '➕ Nuevo Producto' }}</h2>
+        </div>
+        <form [formGroup]="formProducto" (ngSubmit)="guardarProducto()" class="form-grid">
+          <label>
+            <span>Categoría</span>
+            <select formControlName="idCategoria">
+              <option value="">Selecciona una categoría</option>
+              <option *ngFor="let categoria of categorias" [value]="categoria.idCategoria || categoria.id">
+                {{ categoria.nombre }}
+              </option>
+            </select>
+          </label>
+
+          <label>
+            <span>Nombre del Producto</span>
+            <input type="text" formControlName="nombre" placeholder="Ej. Waffle Especial" />
+          </label>
+
+          <label>
+            <span>Descripción</span>
+            <input type="text" formControlName="descripcion" placeholder="Detalles..." />
+          </label>
+
+          <label>
+            <span>Precio (S/.)</span>
+            <input type="number" formControlName="precioBase" min="0.01" step="0.01" placeholder="0.00" />
+          </label>
+
+          <label>
+            <span>Imagen del Producto</span>
+            <input type="file" id="inputImagenProducto" (change)="onFileSelected($event)" accept="image/*" />
+          </label>
+
+          <label class="inline-check">
+            <input type="checkbox" formControlName="disponible" />
+            <span>Disponible para la venta</span>
+          </label>
+
+          <div class="form-actions">
+            <button type="submit" class="primary-btn" [disabled]="formProducto.invalid">
+              {{ modoEdicionProducto ? 'Actualizar' : 'Guardar' }}
+            </button>
+            <button *ngIf="modoEdicionProducto" type="button" class="secondary-btn" (click)="cancelarEdicionProducto()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </article>
+
+      <!-- Catálogo de Productos Agrupados -->
+      <article class="panel-card">
+        <div class="section-header">
+          <h2>Productos registrados ({{ totalProductos }})</h2>
+          <button class="secondary-btn" type="button" (click)="exportProductosCsv()">📥 Excel Productos</button>
+        </div>
+
+        <div *ngIf="productosAgrupadosPorCategoria.length === 0" class="empty-state">
+          No hay productos registrados.
+        </div>
+
+        <div class="category-grid">
+          <div class="category-block" *ngFor="let group of productosAgrupadosPorCategoria">
+            <h3>{{ group.categoria }}</h3>
+            
+            <div class="product-list">
+              <div class="product-row" *ngFor="let producto of group.items; trackBy: trackByProductoId">
+                
+                <div class="product-info-box">
+                  <div class="product-thumb" *ngIf="getImagenProducto(producto)">
+                    <img [src]="getImagenProducto(producto)" alt="{{ producto.nombre }}" (error)="manejarErrorImagen($event)"/>
+                  </div>
+                  <div>
+                    <strong>{{ producto.nombre }}</strong>
+                    <p>
+                      S/. {{ producto.precioBase | number:'1.2-2' }} · 
+                      <span [class.text-active]="producto.disponible" [class.text-inactive]="!producto.disponible">
+                        {{ producto.disponible ? 'Disponible' : 'Agotado' }}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                <div class="action-buttons">
+                  <button type="button" class="btn-action edit" (click)="prepararEditarProducto(producto)">
+                    ✏️ Editar
+                  </button>
+                  <button type="button" class="danger-btn" (click)="eliminarProducto(producto.idProducto)">
+                    🗑️ Eliminar
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- VISTA 4: VENTAS Y ESTADÍSTICAS -->
+    <section *ngIf="section === 'ventas'" class="panel-grid-ventas">
+      <div class="sales-summary-container">
+        <!-- Métricas Rápidas -->
+        <article class="panel-card">
+          <div class="sales-metrics">
+            <div class="metric-item">
+              <span class="metric-label">Total hoy</span>
+              <strong class="metric-value">S/. {{ totalHoy | number:'1.2-2' }}</strong>
+            </div>
+            <div class="metric-divider"></div>
+            <div class="metric-item">
+              <span class="metric-label">Rango Seleccionado</span>
+              <strong class="metric-value">S/. {{ totalVentasSemana | number:'1.2-2' }}</strong>
+            </div>
+            <div class="metric-divider"></div>
+            <div class="metric-item">
+              <span class="metric-label">Producto estrella</span>
+              <strong class="metric-value star-product">{{ topProductoNombre }}</strong>
+            </div>
+          </div>
+        </article>
+
+        <!-- Filtros de Fecha -->
+        <article class="panel-card">
+          <div class="section-header">
+            <h2>Filtrar estadísticas</h2>
+            <button class="secondary-btn" type="button" (click)="exportVentasCsv()">📥 Excel Ventas</button>
+          </div>
+
+          <div class="quick-filter-group">
+            <button type="button" class="quick-btn" [class.active]="filtroActivo === 'hoy'" (click)="filtrarHoy()">
+              📅 Hoy
+            </button>
+            <button type="button" class="quick-btn" [class.active]="filtroActivo === 'semana'" (click)="filtrarSemana()">
+              📆 Esta semana
+            </button>
+            <button type="button" class="quick-btn" [class.active]="filtroActivo === 'mes'" (click)="filtrarMes()">
+              🗓️ Este mes
+            </button>
+          </div>
+
+          <form [formGroup]="formFiltro" class="filter-grid">
+            <label>
+              <span>Desde</span>
+              <input type="date" formControlName="inicio" />
+            </label>
+            <label>
+              <span>Hasta</span>
+              <input type="date" formControlName="fin" />
+            </label>
+            <button class="primary-btn filter-submit-btn" type="button" (click)="aplicarFiltroCustom()">
+              Filtrar
+            </button>
+          </form>
+        </article>
+      </div>
+
+      <!-- Gráficos -->
+      <div class="charts-wrapper">
+        <article class="panel-card chart-card">
+          <div class="chart-header">
+            <h3>Tendencia de Ingresos</h3>
+            <p class="chart-subtitle">Evolución de ventas del período seleccionado</p>
+          </div>
+          <div class="canvas-box line-box">
+            <canvas id="chartVentasLinea"></canvas>
+          </div>
+        </article>
+
+        <div class="charts-two-columns">
+          <article class="panel-card chart-card">
+            <div class="chart-header">
+              <h3>Métodos de Pago</h3>
+              <p class="chart-subtitle">Distribución por modalidad</p>
+            </div>
+            <div class="canvas-box pie-box">
+              <canvas id="chartMetodosPie"></canvas>
+            </div>
+          </article>
+
+          <article class="panel-card chart-card">
+            <div class="chart-header">
+              <h3>Productos Más Vendidos</h3>
+              <p class="chart-subtitle">Unidades comercializadas</p>
+            </div>
+            <div class="canvas-box pie-box">
+              <canvas id="chartProductosPie"></canvas>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <!-- Tabla Historial de Ventas con CSS Grid -->
+      <article class="panel-card">
+        <div class="section-header">
+          <h2>Historial de Ventas ({{ ventasFiltradasActuales.length }})</h2>
+        </div>
+
+        <div class="table-container">
+          <div class="table-grid table-header-ventas">
+            <span>ID Pedido</span>
+            <span>Fecha y Hora</span>
+            <span>Ubicación</span>
+            <span>Método Pago</span>
+            <span>Total</span>
+            <span class="text-right">Estado</span>
+          </div>
+
+          <div *ngIf="ventasFiltradasActuales.length === 0" class="empty-state">
+            No hay registros de ventas para el período seleccionado.
+          </div>
+
+          <div class="table-grid table-row-ventas" *ngFor="let venta of ventasFiltradasActuales; trackBy: trackByVentaId">
+            <code class="order-id">#{{ venta.idPedido || venta.id }}</code>
+            <span class="text-muted">{{ formatearFecha(venta) }}</span>
+            <span>{{ venta.mesa ? 'Mesa ' + venta.mesa : 'Llevar / Delivery' }}</span>
+            <span class="font-medium">{{ venta.metodoPago || 'EFECTIVO' }}</span>
+            <strong class="text-success">S/. {{ venta.totalPagar | number:'1.2-2' }}</strong>
+            <div class="text-right">
+              <span class="badge-status" [class.text-inactive]="(venta.estado || '').toUpperCase() === 'CANCELADO'" [class.active]="(venta.estado || '').toUpperCase() !== 'CANCELADO'">
+                ● {{ venta.estado || 'ENTREGADO' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+  </main>
+</div>
