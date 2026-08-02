@@ -1,5 +1,6 @@
 package com.epiis.app;
 
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -14,28 +15,18 @@ public class WebConfig implements WebMvcConfigurer {
     
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Ruta absoluta para archivos subidos dinámicamente
+        try {
+            // Crear carpeta de uploads si no existe
+            Files.createDirectories(Paths.get(uploadDir));
+        } catch (Exception e) {
+            System.err.println("Error creando carpeta de uploads: " + e.getMessage());
+        }
+        
         String pathAbsoluto = Paths.get(uploadDir).toAbsolutePath().toUri().toString();
         
-        // 1. Servir desde carpeta uploads (imágenes dinámicas)
+        // Servir imágenes desde carpeta uploads
         registry.addResourceHandler("/img/**")
                 .addResourceLocations(pathAbsoluto)
                 .setCachePeriod(3600);
-        
-        // 2. Alternativa: servir desde carpeta estática del proyecto
-        registry.addResourceHandler("/static/**")
-                .addResourceLocations("classpath:/static/")
-                .setCachePeriod(3600);
-        
-        // 3. Servir desde carpeta public
-        registry.addResourceHandler("/public/**")
-                .addResourceLocations("classpath:/public/")
-                .setCachePeriod(3600);
-        
-        // 4. Fallback para archivos no encontrados
-        registry.addResourceHandler("/**")
-                .addResourceLocations(pathAbsoluto)
-                .addResourceLocations("classpath:/static/")
-                .addResourceLocations("classpath:/public/");
     }
 }
