@@ -10,7 +10,7 @@ export class CategoriaService {
         private httpClient: HttpClient
   ) {}
   public getAll(): Observable<any> {
-    return this.httpClient.get('http://localhost:8081/categoria/getall');
+    return this.httpClient.get('https://polaris-soft-v2.onrender.com/categoria/getall');
   }
 
 }
