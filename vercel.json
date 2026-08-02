@@ -1,4 +1,5 @@
 {
+  "buildCommand": "npm run build --prefix Frontend",
   "outputDirectory": "Frontend/dist/appproyectods2025",
   "rewrites": [
     {
