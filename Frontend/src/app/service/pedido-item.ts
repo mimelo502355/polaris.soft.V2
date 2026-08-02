@@ -32,7 +32,7 @@ export interface PedidoItemAcompanamiento {
 })
 export class PedidoItemService {
 
-  private apiUrl = 'http://localhost:8081/pedidoItem';
+  private apiUrl = 'https://polaris-soft-v2.onrender.com/pedidoItem';
 
   constructor(private http: HttpClient) { }
 

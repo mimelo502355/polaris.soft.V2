@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class LoginService {
-  private apiUrl = 'http://localhost:8081/api/auth';
+  private apiUrl = 'https://polaris-soft-v2.onrender.com/api/auth';
 
   // ✅ Keys para sessionStorage (EMPLEADO) - Prefijo "auth_" para diferenciar
   private readonly EMPLEADO_TOKEN_KEY = 'auth_token';

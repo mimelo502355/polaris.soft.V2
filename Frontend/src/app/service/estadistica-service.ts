@@ -11,11 +11,11 @@ export class EstadisticaService {
 	) {}
 
   public ventasSemana():Observable<any> {
-    return this.httpClient.get<any[]>('http://localhost:8081/estadisticas/ventas-semana');
+    return this.httpClient.get<any[]>('https://polaris-soft-v2.onrender.com/estadisticas/ventas-semana');
   }
 
   public productoEstrella(inicio: string, fin: string) {
-    return this.httpClient.get<any[]>( `http://localhost:8081/estadisticas/producto-estrella?inicio=${inicio}&fin=${fin}`);
+    return this.httpClient.get<any[]>( `https://polaris-soft-v2.onrender.com/estadisticas/producto-estrella?inicio=${inicio}&fin=${fin}`);
   }
 
 }

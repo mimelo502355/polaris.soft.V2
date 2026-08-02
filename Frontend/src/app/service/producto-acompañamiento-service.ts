@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class ProductoAcompañamientoService {
-   private baseUrl = 'http://localhost:8081/producto-acompanamiento';
+   private baseUrl = 'https://polaris-soft-v2.onrender.com/producto-acompanamiento';
 
   constructor(private http: HttpClient) {}
 

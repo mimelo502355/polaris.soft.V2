@@ -11,16 +11,16 @@ export class AcompanamientoService {
 
  
   public getAllTopping(): Observable<any> {
-    return this.httpClient.get('http://localhost:8081/acompanamiento/topping');
+    return this.httpClient.get('https://polaris-soft-v2.onrender.com/acompanamiento/topping');
   }
 
   public getAllSalsas(): Observable<any> {
-    return this.httpClient.get('http://localhost:8081/acompanamiento/salsas');
+    return this.httpClient.get('https://polaris-soft-v2.onrender.com/acompanamiento/salsas');
   }
 
   public getByProducto(idProducto: string): Observable<any[]> {
     return this.httpClient.get<any[]>(
-      `http://localhost:8081/producto-acompanamiento/getbyproducto/${idProducto}`
+      `https://polaris-soft-v2.onrender.com/producto-acompanamiento/getbyproducto/${idProducto}`
     );
   }
 }

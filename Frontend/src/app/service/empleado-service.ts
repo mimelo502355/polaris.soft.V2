@@ -14,7 +14,7 @@ export interface Empleado {
   providedIn: 'root'
 })
 export class EmpleadoService {
-  private apiUrl = 'http://localhost:8081/empleado';
+  private apiUrl = 'https://polaris-soft-v2.onrender.com/empleado';
 
   constructor(private http: HttpClient) {}
 

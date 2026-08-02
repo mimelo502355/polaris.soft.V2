@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class PedidoService {
 
-  private baseUrl = 'http://localhost:8081';
+  private baseUrl = 'https://polaris-soft-v2.onrender.com';
 
   constructor(private http: HttpClient) {}
 

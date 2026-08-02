@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class ReporteService {
 
-  private apiUrl = 'http://localhost:8081/reportes/excel';
+  private apiUrl = 'https://polaris-soft-v2.onrender.com/reportes/excel';
 
   constructor(private http: HttpClient) {}
 

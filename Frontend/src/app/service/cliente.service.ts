@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ClienteService {
-  private apiUrl = 'http://localhost:8081/api/auth';
+  private apiUrl = 'https://polaris-soft-v2.onrender.com/api/auth';
 
   // ✅ Keys para sessionStorage (CLIENTE)
   private readonly CLIENT_TOKEN_KEY = 'cliente_token';
